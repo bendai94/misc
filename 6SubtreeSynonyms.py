@@ -110,10 +110,13 @@ class Tree(object):
 		# root = current node looking at
 		# path = current path walked down
 		# comp = childpath of the node we're looking to match
-
-		collapsedPath = CollapseTree(self, root)
-		comp2 = collapsedPath[collapsedPath[1:].find("/")+1:]
-		# comp2 = childpath of current node
+		try:
+			collapsedPath = CollapseTree(self, root)
+			comp2 = collapsedPath[collapsedPath[1:].find("/")+1:]
+			# comp2 = childpath of current node
+		except Exception as e:
+			comp2 = ""
+			# if it can't be collapsed, assume it won't match
 
 		if comp2 == comp:
 			syns.append(path + str(root.name))
@@ -136,9 +139,12 @@ def Synonym(tree, root, path):
 	# Gets the node we compare against
 	node = ClimbTree(tree, root, parts)
 	# path of the node we compare against
-	collapsedPath = CollapseTree(tree, node)
-	# get a string of the children of the node
-	comp = collapsedPath[collapsedPath.rfind("/"):]
+	try:
+		collapsedPath = CollapseTree(tree, node)
+		# get a string of the children of the node
+		comp = collapsedPath[collapsedPath.rfind("/"):]
+	except Exception as e:
+		raise Exception("Unable to Collapse children of the Synonyms")	
 
 	syns = []
 	# start the recursive call to gather synonyms
@@ -192,9 +198,11 @@ def Collapse(Tree, root):
 		# single child
 		parts += Collapse(tree, root.child[0])
 		parts = ["/".join(parts)]
-		# multiple children
+
 	elif len(root.child) > 1:
+		# multiple children
 		childrenPath = []
+
 		# recurse to build a path for each child
 		for i in xrange(len(root.child)):
 			childrenPath += Collapse(tree, root.child[i])
@@ -236,14 +244,24 @@ def Collapse(Tree, root):
 				# if the exploded nodes had children, re-attach them before returning
 				if remainingPath:
 
+					# Check to make sure explosions weren't manual
+					for path in childrenPath:
+						if childrenPath[0][(childrenPath[0].find("/")+1):] != path[(path.find("/")+1):]:
+							raise Exception("Exploded nodes have non-identical children")
+
+					# stick on the rest of the path, now that the explosion is collapsed
 					parts.append(childrenPath[0][(childrenPath[0].find("/")+1):])
+
 				
 				parts = ["/".join(parts)]
 
 			else:
-				pass # no match
+				# multiple children
+				raise Exception("Unable to represent in a single line")
+
 		else:
-			pass # not found
+			# non-exploded multiple children
+			raise Exception("Unable to represent in a single line")
 	
 	return parts
 
@@ -257,7 +275,10 @@ root = tree.build(root, SplitPath("/home/sports|music/misc|favorites"))
 # not just on the same level
 root = tree.build(root, SplitPath("/home/other/art/misc|favorites"))
 
-Synonym(tree, root, "/home/sports")
+try:
+	Synonym(tree, root, "/home/sports")
+except Exception as e:
+	print "Error: " + str(e)
 
 """ OUTPUT
 
