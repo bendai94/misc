@@ -47,9 +47,10 @@ class Tree(object):
 				for newnode in self.Explode(path[index].split("|")):
 					self.insertChild(root, newnode)
 				index += 1
-				# if the explosion has children
+				# if the explosion has children, keep building
 				if len(path) > index:
 					for i in xrange(len(root.child)):
+						# recurse and continue down the path
 						self.build(root.child[i], path[index:])
 			
 
@@ -81,13 +82,15 @@ class Tree(object):
 	        
 	    if len(path) > 1:
 
+	    	# recurse until only single return
 	        temp = self.Explode(path[1:])
 
+	        #combine this node with each thing returned
 	        for group in temp:
 	            combo.append( path[0] + "-" + group )
 	            
-	        # builds it in the correct order
-	        # as shown in the question
+	        # builds as shown in Q3
+	        # not neccessary, but doesn't hurt to leave in
 	        output = temp[:len(path)-1] + combo[:len(path)-1] + temp[len(path)-1:] + combo[len(path)-1:]
 	        output.insert(0, path[0] )
 	        
@@ -120,6 +123,24 @@ root = None
 
 root = tree.build(root, SplitPath("/home/sports|music/misc|favorites"))
 
-
-# Depth first search, top down
+# Depth first pre-order (root then children)
 tree.printTree(root)
+
+""" OUTPUT 
+
+C:\Users\Ben\Documents\GitHub\misc>4MultiComboNodes.py
+home
+sports
+misc
+favorites
+misc-favorites
+music
+misc
+favorites
+misc-favorites
+sports-music
+misc
+favorites
+misc-favorites
+
+"""

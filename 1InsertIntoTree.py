@@ -40,10 +40,12 @@ class Tree(object):
 		if index < len(path):
 			if root.left == None:
 				root.left = self.build(root.left, path[index:])
-			elif root.left == path[index+1]:
+			elif root.left.name == path[index]:
 				self.build(root.left, path[index:])
 			elif root.right == None:
 				root.right = self.build(root.right, path[index:])
+			elif root.right.name == path[index]:
+				self.build(root.right, path[index:])
 
 
 
@@ -70,12 +72,45 @@ def SplitPath(path):
 	return parts
 
 
+# Question directions
+treeQ = Tree()
+rootQ = None
 
-tree = Tree()
-root = None
+print "Inserting /home/sports/basketball/ncaa"
+print "Then /home/music/rap/gangster"
+rootQ = treeQ.build(rootQ, SplitPath("/home/sports/basketball/ncaa"))
+rootQ = treeQ.build(rootQ, SplitPath("/home/music/rap/gangster :"))
 
-root = tree.build(root, SplitPath("/home/sports/basketball/ncaa"))
-root = tree.build(root, SplitPath("/home/music/rap/gangster"))
+# depth-first, in-order binary tree output
+treeQ.printTree(rootQ)
+print
 
-# depth-first search, left to right binary tree
-tree.printTree(root)
+# Tree from the image
+treeP = Tree()
+rootP = None
+print "Building a Tree to match the image"
+print "Then inserting /home/music/rap/gangster to add the leaf :"
+rootP = treeP.build(rootP, SplitPath("/home/sports/basketball/ncaa"))
+rootP = treeP.build(rootP, SplitPath("/home/sports/football"))
+rootP = treeP.build(rootP, SplitPath("/home/music/rap"))
+rootP = treeP.build(rootP, SplitPath("/home/music/rock"))
+
+rootP = treeP.build(rootP, SplitPath("/home/music/rap/gangster"))
+
+# depth-first, in-order binary tree output
+treeP.printTree(rootP)
+
+""" OUTPUT 
+
+C:\Users\Ben\Documents\GitHub\misc>1InsertIntoTree.py
+Inserting /home/sports/basketball/ncaa
+Then /home/music/rap/gangster
+ncaa
+basketball
+sports
+home
+gangster
+rap
+music
+
+"""

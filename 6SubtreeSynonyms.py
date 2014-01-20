@@ -49,7 +49,7 @@ class Tree(object):
 					self.insertChild(root, newnode)
 
 				index += 1
-				# continue if the explosion has children
+				# if the explosion has children, keep building
 				if len(path) > index:
 					for i in xrange(len(root.child)):
 						# recurse and continue down the path
@@ -84,13 +84,15 @@ class Tree(object):
 	        
 	    if len(path) > 1:
 
+	    	# recurse until only single return
 	        temp = self.Explode(path[1:])
 
+	        #combine this node with each thing returned
 	        for group in temp:
 	            combo.append( path[0] + "-" + group )
 	            
-	        # builds it in the correct order
-	        # as shown in the question
+	        # builds as shown in Q3
+	        # not neccessary, but doesn't hurt to leave in
 	        output = temp[:len(path)-1] + combo[:len(path)-1] + temp[len(path)-1:] + combo[len(path)-1:]
 	        output.insert(0, path[0] )
 	        
@@ -105,25 +107,27 @@ class Tree(object):
 				self.printTree(child)
 			
 	def TraverseCompare(self, root, path, comp, syns):
-		if IgnoreRoot( CollapseTree(self, root) ) == comp:
-			syns.append(path +  str(root.name))
+		# root = current node looking at
+		# path = current path walked down
+		# comp = childpath of the node we're looking to match
 
+		collapsedPath = CollapseTree(self, root)
+		comp2 = collapsedPath[collapsedPath[1:].find("/")+1:]
+		# comp2 = childpath of current node
+
+		if comp2 == comp:
+			syns.append(path + str(root.name))
+
+		# recurse down the children's paths
 		for child in root.child:
-			currpath = str(root.name) + "/"
+			currpath = path + str(root.name) + "/"
 			syns = self.TraverseCompare(child, currpath, comp, syns)
 
 		return syns
 
 
-
-
-def IgnoreRoot(path):
-
-	index = path[1:].find("/")
-	comp = path[index+1:]
-	return comp
-
 def Synonym(tree, root, path):
+	# non-recursive, root is the root of the whole tree
 	parts = []
 	parts = SplitPath(path)
 	print "Looking For ",
@@ -131,19 +135,24 @@ def Synonym(tree, root, path):
 
 	# Gets the node we compare against
 	node = ClimbTree(tree, root, parts)
+	# path of the node we compare against
+	collapsedPath = CollapseTree(tree, node)
+	# get a string of the children of the node
+	comp = collapsedPath[collapsedPath.rfind("/"):]
 
-	comp = IgnoreRoot( CollapseTree(tree, node) )
-	
 	syns = []
+	# start the recursive call to gather synonyms
 	syns = tree.TraverseCompare(root, "", comp, syns)
 
 	for synonym in syns:
-		if "/"+synonym == path:
+		if "/" + synonym == path:
 			pass # start location
 		else:
-			print "/"+synonym
+			print "/" + synonym
 	
 def ClimbTree(tree, root, path):
+	# recursive, root is just current node
+	# just go through a tree to return a specific node for searching
 	if root.name == path[0]:
 		if len(path) == 1:
 			# found it
@@ -178,7 +187,7 @@ def Collapse(Tree, root):
 	parts.append(root.name)
 
 	if len(root.child) == 0:
-		pass
+		pass # leaf
 	elif len(root.child) == 1:
 		# single child
 		parts += Collapse(tree, root.child[0])
@@ -238,12 +247,24 @@ def Collapse(Tree, root):
 	
 	return parts
 
+
+
 tree = Tree()
 root = None
 
 root = tree.build(root, SplitPath("/home/sports|music/misc|favorites"))
-
-# Depth first search, top down
-# tree.printTree(root)
+# adding an additional leaf in the tree, synonyms are searched anywhere,
+# not just on the same level
+root = tree.build(root, SplitPath("/home/other/art/misc|favorites"))
 
 Synonym(tree, root, "/home/sports")
+
+""" OUTPUT
+
+C:\Users\Ben\Documents\GitHub\misc>6SubtreeSynonyms.py
+Looking For  /home/sports
+/home/music
+/home/sports-music
+/home/other/art
+
+"""

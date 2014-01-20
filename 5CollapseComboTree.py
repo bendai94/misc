@@ -49,7 +49,7 @@ class Tree(object):
 					self.insertChild(root, newnode)
 
 				index += 1
-				# continue if the explosion has children
+				# if the explosion has children, keep building
 				if len(path) > index:
 					for i in xrange(len(root.child)):
 						# recurse and continue down the path
@@ -84,13 +84,15 @@ class Tree(object):
 	        
 	    if len(path) > 1:
 
+	    	# recurse until only single return
 	        temp = self.Explode(path[1:])
 
+	        #combine this node with each thing returned
 	        for group in temp:
 	            combo.append( path[0] + "-" + group )
 	            
-	        # builds it in the correct order
-	        # as shown in the question
+	        # builds as shown in Q3
+	        # not neccessary, but doesn't hurt to leave in
 	        output = temp[:len(path)-1] + combo[:len(path)-1] + temp[len(path)-1:] + combo[len(path)-1:]
 	        output.insert(0, path[0] )
 	        
@@ -125,14 +127,16 @@ def Collapse(Tree, root):
 	parts.append(root.name)
 
 	if len(root.child) == 0:
-		pass
+		pass # leaf
 	elif len(root.child) == 1:
 		# single child
 		parts += Collapse(tree, root.child[0])
 		parts = ["/".join(parts)]
-		# multiple children
+		
 	elif len(root.child) > 1:
+		# multiple children
 		childrenPath = []
+
 		# recurse to build a path for each child
 		for i in xrange(len(root.child)):
 			childrenPath += Collapse(tree, root.child[i])
@@ -174,25 +178,42 @@ def Collapse(Tree, root):
 				# if the exploded nodes had children, re-attach them before returning
 				if remainingPath:
 
+					# Check to make sure explosions weren't manual
+					for path in childrenPath:
+						if childrenPath[0][(childrenPath[0].find("/")+1):] != path[(path.find("/")+1):]:
+							raise Exception("Exploded nodes have non-identical children")
+
+					# stick on the rest of the path, now that the explosion is collapsed
 					parts.append(childrenPath[0][(childrenPath[0].find("/")+1):])
+
 				
 				parts = ["/".join(parts)]
 
 			else:
-				pass # no match
+				# multiple children
+				raise Exception("Unable to represent in a single line")
+
 		else:
-			pass # not found
+			# non-exploded multiple children
+			raise Exception("Unable to represent in a single line")
 	
 	return parts
 
 tree = Tree()
 root = None
 
+# build the tree, identical to Q4
 root = tree.build(root, SplitPath("/home/sports|music/misc|favorites"))
 
-# Depth first search, top down
-# tree.printTree(root)
+# collapse the built tree
+try:
+	print CollapseTree(tree, root)
+except Exception as e:
+	print "Unable to Collapse: "+ str(e)
 
-print CollapseTree(tree, root)
+""" OUTPUT
 
+C:\Users\Ben\Documents\GitHub\misc>5CollapseComboTree.py
+/home/sports|music/misc|favorites
 
+"""

@@ -88,13 +88,34 @@ def SplitPath(path):
 	return parts
 
 
-
 tree = Tree()
 root = None
-
+print "Building the tree"
 root = tree.build(root, SplitPath("/home/sports/basketball/ncaa"))
-root = tree.build(root, SplitPath("/home/music/rap/gangster"))
+root = tree.build(root, SplitPath("/home/sports/football"))
+root = tree.build(root, SplitPath("/home/music/rap"))
+root = tree.build(root, SplitPath("/home/music/rock"))
+# depth-first, in-order binary tree output
+tree.printTree(root)
+
+print
+print "Adding dual leaf-nodes"
+
 root = tree.build(root, SplitPath("/home/sports/football/NFL|NCAA"))
 
-# depth-first search, left to right binary tree
 tree.printTree(root)
+
+""" OUTPUT 
+
+C:\Users\Ben\Documents\GitHub\misc>2DualLeafInsert.py
+Building the tree
+ncaa
+basketball
+sports
+football
+home
+rap
+music
+rock
+
+"""

@@ -77,15 +77,19 @@ class Tree(object):
 	        
 	    if len(path) > 1:
 
+	    	# recurse until only single return
 	        temp = self.Explode(path[1:])
 
+	        #combine this node with each thing returned
 	        for group in temp:
 	            combo.append( path[0] + "-" + group )
 	            
 	        # builds it in the correct order
 	        # as shown in the question
+	        # (single first, than pairs, than triplets)
 	        output = temp[:len(path)-1] + combo[:len(path)-1] + temp[len(path)-1:] + combo[len(path)-1:]
 	        output.insert(0, path[0] )
+	        # only works for 3 or less, could be better?
 	        
 	    return output
 
@@ -116,6 +120,20 @@ root = None
 
 root = tree.build(root, SplitPath("/home/music/rap|rock|pop"))
 
-
-# Depth first search, top down
+# Depth first pre-order (root then children)
 tree.printTree(root)
+
+""" OUTPUT 
+
+C:\Users\Ben\Documents\GitHub\misc>3ComboLeafInsert.py
+home
+music
+rap
+rock
+pop
+rap-rock
+rap-pop
+rock-pop
+rap-rock-pop
+
+"""
